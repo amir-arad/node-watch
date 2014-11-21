@@ -31,7 +31,7 @@ describe('detect changes', function() {
     tmp.dir(function(err, dir) {
       if (err) return done(err);
       watchdir = dir;
-      setTimeout(done, 1e3);
+      done();
     });
   });
  
@@ -63,22 +63,56 @@ describe('detect changes', function() {
     });
   });    
 
-  it('should watch new created folder', function(done) {
-    var tmpfile, tmpdir;
+  it('should watch recursively', function(done) {
+    var tmpfile; 
+    var tmpdir = [];
     watch(watchdir, function(changed) {
-      if (tmpdir != changed) {
+      if (tmpdir.indexOf(changed) == -1) {
         assert.equal(tmpfile, changed)
         done();
       }
     });
 
     createDirUnder(watchdir, function(dir) {
-      tmpdir = dir;
-      createFileUnder(tmpdir, function(file) {
-        tmpfile = file;
-        randomWriteTo(file, 120);
-      }); 
+      tmpdir.push(dir);
+      createDirUnder(dir, function(sdir) {
+        tmpdir.push(sdir);
+        createFileUnder(sdir, function(file) {
+          tmpfile = file;
+          randomWriteTo(file, 120);
+        }); 
+      });
     });
   });    
+
+  it('should ignore symblic link by default', function(done) {
+    var tmpfile;
+    var link = watchdir + '-link';
+    fs.symlinkSync(watchdir, link, 'dir');
+    watch(link, function(changed) {
+      assert(false);
+    });
+
+    createFileUnder(link, function(file) {
+      tmpfile = file;
+      randomWriteTo(file);
+    }); 
+    setTimeout(done, 200);
+  });     
+
+  it('should follow symblic link with option', function(done) {
+    var tmpfile;
+    var link = watchdir + '-link';
+    fs.symlinkSync(watchdir, link, 'dir');
+    watch(link, {followSymLinks: true}, function(changed) {
+      assert.equal(tmpfile, changed)
+      done();
+    });
+
+    createFileUnder(link, function(file) {
+      tmpfile = file;
+      randomWriteTo(file);
+    }); 
+  });       
 
 });
