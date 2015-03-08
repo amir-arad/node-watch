@@ -45,8 +45,8 @@ describe('detect changes', function() {
         }
       });
       randomWriteTo(tmpfile);        
-      randomWriteTo(tmpfile, 150);        
-      randomWriteTo(tmpfile, 300);        
+      randomWriteTo(tmpfile, 250);        
+      randomWriteTo(tmpfile, 500);        
     });
   });   
 
@@ -79,7 +79,7 @@ describe('detect changes', function() {
         tmpdir.push(sdir);
         createFileUnder(sdir, function(file) {
           tmpfile = file;
-          randomWriteTo(file, 120);
+          randomWriteTo(file, 500);
         }); 
       });
     });

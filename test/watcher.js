@@ -69,7 +69,7 @@ describe('watcher', function(){
       setTimeout(function() {
         assert.equal(changed, 1);
         done();
-      }, 200);
+      }, 500);
     }, 100);
   });
 });
